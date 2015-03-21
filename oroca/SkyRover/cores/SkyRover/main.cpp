@@ -9,78 +9,21 @@ extern "C"
 
 #include "usb_lib.h"
 #include "usb_pwr.h"
+#include "thread_main.h"
 }
 
 
-//-- Thread 관련 함수
-//
 
-osThreadId Thread_Handle_Loop;
-osThreadId Thread_Handle_Loop_Control;
-osThreadId Thread_Handle_Serial;
-
-
-static void Thread_Loop_Control(void const *argument)
-{
-    uint32_t count = 0;
-    (void) argument;
-
-    DEBUG_PRINT("Thread Loop Control\r\n");
-
-    for (;;)
-    {
-        loop_control();
-    }
-}
-
-
-static void Thread_Serial(void const *argument)
-{
-    uint32_t count = 0;
-    (void) argument;
-
-    DEBUG_PRINT("Thread Serial\r\n");
-
-    for (;;)
-    {
-        if( bDeviceState == CONFIGURED )
-        {
-            //Hw_VCom_Putch('u');
-            //Hw_VCom_Putch('s');
-            //Hw_VCom_Putch('b');
-            //Hw_VCom_Putch(' ');
-        }
-        osDelay(1000);
-    }
-}
-
-
-static void Thread_Loop(void const *argument)
-{
-    uint32_t count = 0;
-    (void) argument;
-
-    DEBUG_PRINT("Thread Loop\r\n");
-
-    for (;;)
-    {
-        loop();
-    }
-}
 
 
 
 
 core_t core;
 
-extern "C"
-{
 extern rcReadRawDataPtr rcReadRawFunc;
 
 // receiver read function
 extern uint16_t pwmReadRawRC(uint8_t chan);
-}
-
 
 #ifdef USE_LAME_PRINTF
 // gcc/GNU version
@@ -111,9 +54,14 @@ int main(void)
     serialPort_t* loopbackPort = NULL;
 
 
-    //-- 시스템 초기화 
+
+    //-- 하드웨어 초기화
     //
     systemInit();
+
+    //-- USB 초기
+    //
+    Hw_VCom_Init();
 
 
 #ifdef USE_LAME_PRINTF
@@ -233,9 +181,21 @@ int main(void)
 
     serialInit(mcfg.serial_baudrate);
 
-    DEBUG_PRINT("Booting..\r\n");
+    if( mcfg.uart1_type != _UART1_TYPE_MW )
+    {
+        core.menuport  = uartOpen(USART1, NULL, mcfg.serial_baudrate, MODE_RXTX);
+        core.debugport = core.menuport;
+    }
+    else
+    {
+        core.debugport = core.mainport;
+    }
 
-    Hw_VCom_Init();
+
+    DEBUG_PRINT("Booting.. ");
+    DEBUG_PRINT(_SKYROVER_VER_STR_);
+    DEBUG_PRINT("\r\n");
+
 
     // drop out any sensors that don't seem to work, init all the others. halt if gyro is dead.
     sensorsAutodetect();
@@ -265,49 +225,21 @@ int main(void)
     calibratingB = CALIBRATING_BARO_CYCLES;             // 10 seconds init_delay + 200 * 25 ms = 15 seconds before ground pressure settles
     f.SMALL_ANGLES_25 = 1;
 
+
     DEBUG_PRINT("Start\r\n");
 
+    core.useVComMultiwii = false;
+    core.useShowMspCmd   = false;
 
-    //-- Thread 1 definition
-    //
-    osThreadDef(TASK1, Thread_Loop_Control  , osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    osThreadDef(TASK2, Thread_Serial        , osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-    osThreadDef(TASK3, Thread_Loop          , osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
-
-    //-- Start thread
-    //
-    Thread_Handle_Loop_Control   = osThreadCreate(osThread(TASK1), NULL);
-    Thread_Handle_Serial         = osThreadCreate(osThread(TASK2), NULL);
-    Thread_Handle_Loop           = osThreadCreate(osThread(TASK3), NULL);
 
     //-- 아두이노 설정 
     //
     setup();
 
 
-    //-- Start scheduler
+    //-- thread 시작
     //
-    osKernelStart(NULL, NULL);
-
-
-
-
-
-
-    // loopy
-    while (1) {
-        loop();
-#ifdef SOFTSERIAL_LOOPBACK
-        if (loopbackPort) {
-            while (serialTotalBytesWaiting(loopbackPort)) {
-    
-                uint8_t b = serialRead(loopbackPort);
-                serialWrite(loopbackPort, b);
-                //serialWrite(core.mainport, b);
-            };
-        }
-#endif
-    }
+    thread_main();
 }
 
 void HardFault_Handler(void)

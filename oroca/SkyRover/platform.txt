@@ -32,7 +32,7 @@ compiler.define=-DARDUINO=
 build.extra_flags=
 
 compiler.cores.path={runtime.ide.path}/hardware/oroca/SkyRover/cores/SkyRover
-compiler.libsam.c.flags="-I{compiler.cores.path}/CMSIS" "-I{compiler.cores.path}/FreeRTOS" "-I{compiler.cores.path}/src" "-I{compiler.cores.path}/STM32_LIB" "-I{compiler.cores.path}/STM32_USB"  "-I{compiler.cores.path}/USB_Port" "-I{build.path}"
+compiler.libsam.c.flags="-I{compiler.cores.path}/CMSIS" "-I{compiler.cores.path}/FreeRTOS" "-I{compiler.cores.path}/src" "-I{compiler.cores.path}/src/thread" "-I{compiler.cores.path}/STM32_LIB" "-I{compiler.cores.path}/STM32_USB" "-I{compiler.cores.path}/u8glib"  "-I{compiler.cores.path}/USB_Port" "-I{build.path}"
 
 
 

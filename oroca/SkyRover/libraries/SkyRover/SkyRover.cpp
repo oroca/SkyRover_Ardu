@@ -6,6 +6,7 @@
 //
 extern int16_t angle[2];
 extern int16_t heading;
+extern uint8_t thread_menu_enable;
 
 
 static void uart1_putc(void *p, char c)
@@ -28,6 +29,30 @@ static void usb_putc(void *p, char c)
 void SkyRover::begin(void) 
 {
 	DEBUG_PRINT("SkyRover Begin\r\n");
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE  : menu_off
+     WORK   :
+     ARG    :
+     RET    :
+---------------------------------------------------------------------------*/
+void SkyRover::menu_off(void) 
+{
+    thread_menu_enable = 0;    
+}
+
+
+/*---------------------------------------------------------------------------
+     TITLE  : menu_off
+     WORK   :
+     ARG    :
+     RET    :
+---------------------------------------------------------------------------*/
+void SkyRover::menu_on(void) 
+{
+    thread_menu_enable = 1;    
 }
 
 

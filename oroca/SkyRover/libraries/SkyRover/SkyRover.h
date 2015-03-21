@@ -33,6 +33,9 @@ public:
 	void usb_printf( char *format, ... );
 	void uart1_printf( char *format, ... );
 
+	void menu_on(void);
+	void menu_off(void);
+
 	int16_t imu_GetAngleRoll( void );
 	int16_t imu_GetAnglePitch( void );
 	int16_t imu_GetAngleYaw( void );

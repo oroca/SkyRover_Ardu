@@ -286,6 +286,10 @@ typedef struct master_t {
     config_t profile[3];                    // 3 separate profiles
     uint8_t current_profile;                // currently loaded profile
 
+
+    // SkyRover용 변수 추가
+    uint8_t	uart1_type;						// 0:mw, 1:lcd
+
     uint8_t magic_ef;                       // magic number, should be 0xEF
     uint8_t chk;                            // XOR checksum
 } master_t;
@@ -296,9 +300,14 @@ typedef struct core_t {
     serialPort_t *gpsport;
     serialPort_t *telemport;
     serialPort_t *rcvrport;
+    serialPort_t *blueport;
+    serialPort_t *menuport;
+    serialPort_t *debugport;
     uint8_t mpu6050_scale;                  // es/non-es variance between MPU6050 sensors, half my boards are mpu6000ES, need this to be dynamic. automatically set by mpu6050 driver.
     uint8_t numRCChannels;                  // number of rc channels as reported by current input driver
     bool useServo;                          // feature SERVO_TILT or wing/airplane mixers will enable this
+    bool useVComMultiwii;
+    bool useShowMspCmd;
 } core_t;
 
 typedef struct flags_t {
@@ -398,7 +407,7 @@ extern baro_t baro;
 
 // main
 void setPIDController(int type);
-void loop_control(void);
+void loop(void);
 
 // IMU
 void imuInit(void);

@@ -1,11 +1,11 @@
 //----------------------------------------------------------------------------
 //    프로그램명 	: VCom 관련 함수
 //
-//    만든이     	: 
+//    만든이     	:
 //
-//    날  짜     	: 
+//    날  짜     	:
 //    
-//    최종 수정  	: 
+//    최종 수정  	:
 //
 //    MPU_Type		:
 //
@@ -39,8 +39,10 @@
 //-- 내부 함수
 //
 
-
-
+static void usb_putc(void *p, char c)
+{
+    Hw_VCom_Putch(c);
+}
 
 
 /*---------------------------------------------------------------------------
@@ -94,6 +96,23 @@ u8 Hw_VCom_Getch( void )
 
 
 
+/*---------------------------------------------------------------------------
+     TITLE	: Hw_VCom_IsReceived
+     WORK
+			: 시리얼 포트에서 데이터가 왔는지 검사
+     ARG
+     RET
+---------------------------------------------------------------------------*/
+u8 Hw_VCom_IsReceived( void )
+{
+	if( HW_VCOM_Q_VAILD(0) > 0 ) return 1;
+	else 						 return 0;
+}
+
+
+
+
+
 extern void USB_Send_Data( u8 SendData );
 
 /*---------------------------------------------------------------------------
@@ -105,7 +124,10 @@ extern void USB_Send_Data( u8 SendData );
 ---------------------------------------------------------------------------*/
 void Hw_VCom_Putch( char Uart_PutData )
 {
-	USB_Send_Data( Uart_PutData );
+	if( bDeviceState == CONFIGURED )
+	{
+		USB_Send_Data( Uart_PutData );
+	}
 }
 
 
@@ -151,7 +173,7 @@ void Hw_VCom_PrintEx( char *UartPrintData )
 ---------------------------------------------------------------------------*/
 void Hw_VCom_Printf( char *format, ... )
 {
-	char Str[200];
+	//char Str[200];
 	
 	//va_list ap;
 	
@@ -159,12 +181,16 @@ void Hw_VCom_Printf( char *format, ... )
 
 	//vsprintf( Str, format, ap );	
 
-	sprintf(Str, format );
+	//sprintf(Str, format );
 	
 	//va_end(ap);	
 	
-	
-	
-	
-	Hw_VCom_PrintEx( Str );
+	//Hw_VCom_PrintEx( Str );
+
+
+    va_list va;
+    va_start(va, format);
+    tfp_format(NULL, usb_putc, format, va);
+    va_end(va);		
+
 }

@@ -82,41 +82,59 @@ static const uint8_t multiPPM[] = {
 
 #if defined(SKYROVER)
 
+
+#if defined(SKYROVER_HEX)
 static const uint8_t multiPWM[] = {
-    PWM1 | TYPE_IW,     // input #1
-    PWM3 | TYPE_IW,
-    PWM9 | TYPE_IW,
+    PWM4  | TYPE_IW,     // input #1
+    PWM3  | TYPE_IW,
+    PWM9  | TYPE_IW,
     PWM10 | TYPE_IW,
     PWM13 | TYPE_IW,
     PWM14 | TYPE_IW,
-    PWM7 | TYPE_IW,
-    PWM8 | TYPE_IW,     // input #8
-    PWM6  | TYPE_M,      // M0 
-    PWM5  | TYPE_M,      // M1
-    PWM4  | TYPE_M,      // M2
-    PWM2  | TYPE_M,      // M3
+    PWM7  | TYPE_IW,
+    PWM2  | TYPE_IW,     // input #8
+    PWM5  | TYPE_M,      // M0
+    PWM12 | TYPE_M,      // M1
+    PWM6  | TYPE_M,      // M2
+    PWM8  | TYPE_M,      // M3
     PWM11 | TYPE_M,      // M4
-    PWM12 | TYPE_M,      // M5
+    PWM1  | TYPE_M,      // M5
     0xFF
 };
-
-
-#if 0
+#elif defined(SKYROVER_QUAD)
 static const uint8_t multiPWM[] = {
-    PWM1 | TYPE_IW,     // input #1
-    PWM2 | TYPE_IW,
-    PWM3 | TYPE_IW,
-    PWM4 | TYPE_IW,
-    PWM5 | TYPE_IW,
-    PWM6 | TYPE_IW,
-    PWM7 | TYPE_IW,
-    PWM8 | TYPE_IW,     // input #8
-    PWM9 | TYPE_IW,     // 
-    PWM10 | TYPE_IW,    // 
-    PWM11 | TYPE_M,     // M0
-    PWM12 | TYPE_M,     // M1
-    PWM13 | TYPE_M,     // M2
-    PWM14 | TYPE_M,     // M3
+    PWM4  | TYPE_IW,     // input #1
+    PWM3  | TYPE_IW,
+    PWM9  | TYPE_IW,
+    PWM10 | TYPE_IW,
+    PWM13 | TYPE_IW,
+    PWM14 | TYPE_IW,
+    PWM7  | TYPE_IW,
+    PWM2  | TYPE_IW,     // input #8
+    PWM11 | TYPE_IW,      // M4
+    PWM1  | TYPE_IW,      // M5
+    PWM5  | TYPE_M,      // M0
+    PWM12 | TYPE_M,      // M1
+    PWM6  | TYPE_M,      // M2
+    PWM8  | TYPE_M,      // M3
+    0xFF
+};
+#else
+static const uint8_t multiPWM[] = {
+    PWM4  | TYPE_IW,     // input #1
+    PWM3  | TYPE_IW,
+    PWM9  | TYPE_IW,
+    PWM10 | TYPE_IW,
+    PWM13 | TYPE_IW,
+    PWM14 | TYPE_IW,
+    PWM7  | TYPE_IW,
+    PWM2  | TYPE_IW,     // input #8
+    PWM5  | TYPE_M,      // M0
+    PWM12 | TYPE_M,      // M1
+    PWM6  | TYPE_M,      // M2
+    PWM8  | TYPE_M,      // M3
+    PWM11 | TYPE_M,      // M4
+    PWM1  | TYPE_M,      // M5
     0xFF
 };
 #endif

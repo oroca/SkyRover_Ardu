@@ -431,7 +431,7 @@ void setPIDController(int type)
     }
 }
 
-void loop_control(void)
+void loop_mw(void)
 {
     static uint8_t rcDelayCommand;      // this indicates the number of time (multiple of RC measurement at 50Hz) the sticks must be maintained to run or switch off motors
     static uint8_t rcSticks;            // this hold sticks position for command combos
@@ -729,6 +729,29 @@ void loop_control(void)
             }
         }
 #endif
+
+
+#ifdef ACC_AS_MAG
+        if (sensors(SENSOR_ACC))
+        {
+            if (rcOptions[BOXHEADFREE])
+            {
+                if (!f.HEADFREE_MODE)
+                {
+                    f.HEADFREE_MODE = 1;
+                }
+            }
+            else
+            {
+                f.HEADFREE_MODE = 0;
+            }
+            if (rcOptions[BOXHEADADJ])
+            {
+                headFreeModeHold = heading; // acquire new heading
+            }
+        }
+#endif
+
 
         if (sensors(SENSOR_GPS)) {
             if (f.GPS_FIX && GPS_numSat >= 5) {

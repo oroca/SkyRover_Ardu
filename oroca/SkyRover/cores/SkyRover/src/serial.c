@@ -39,6 +39,17 @@
 #define MSP_TRIM_DOWN            154
 #define MSP_TRIM_LEFT            155
 #define MSP_TRIM_RIGHT           156
+
+#define MSP_TRIM_UP_FAST         157
+#define MSP_TRIM_DOWN_FAST       158
+#define MSP_TRIM_LEFT_FAST       159
+#define MSP_TRIM_RIGHT_FAST      160
+
+#define MSP_READ_TEST_PARAM      189
+#define MSP_SET_TEST_PARAM       190
+
+#define MSP_READ_TEST_PARAM      189
+#define MSP_HEX_NANO             199
 #endif
 
 
@@ -66,10 +77,13 @@
 #define MSP_DEBUG                254    //out message         debug1,debug2,debug3,debug4
 
 // Additional commands that are not compatible with MultiWii
+#if defined(SKYROVER)
+#else
 #define MSP_UID                  160    //out message         Unique device ID
 #define MSP_ACC_TRIM             240    //out message         get acc angle trim values
 #define MSP_SET_ACC_TRIM         239    //in message          set acc angle trim values
 #define MSP_GPSSVINFO            164    //out message         get Signal Strength (only U-Blox)
+#endif
 
 #define INBUF_SIZE 64
 
@@ -247,7 +261,18 @@ void serialInit(uint32_t baudrate)
 {
     int idx;
 
-    core.mainport = uartOpen(USART1, NULL, baudrate, MODE_RXTX);
+
+    if( mcfg.uart1_type == _UART1_TYPE_MW )
+    {
+        core.mainport  = uartOpen(USART1, NULL, baudrate, MODE_RXTX);
+    }
+    else
+    {
+    	core.mainport  = uartOpen(USART2, NULL, baudrate, MODE_RXTX);
+    }
+
+    core.mainport->ByPassToVCom = true;
+
 
     // calculate used boxes based on features and fill availableBoxes[] array
     memset(availableBoxes, 0xFF, sizeof(availableBoxes));
@@ -383,46 +408,89 @@ static void evaluateCommand(void)
      break;
    
    case MSP_TRIM_UP:
-   /*
-     conf.angleTrim[PITCH]+=1; 
-     writeParams(1);
-     #if defined(LED_RING)
-       blinkLedRing();
-     #endif
-    */
-     cfg.angleTrim[PITCH] += 1;    
-     writeEEPROM(1, true);
+     if(cfg.angleTrim[PITCH] < 120)
+     {
+    	 cfg.angleTrim[PITCH] += 1;
+    	 writeEEPROM(1, true);
+     }
      break;
 
    case MSP_TRIM_DOWN:
-     //conf.angleTrim[PITCH]-=1; 
-     //writeParams(1);
-     //#if defined(LED_RING)
-     //  blinkLedRing();
-     //#endif
-     cfg.angleTrim[PITCH] -= 1;    
-     writeEEPROM(1, true);   
+	 if( cfg.angleTrim[PITCH] > -120 )
+	 {
+		 cfg.angleTrim[PITCH] -= 1;
+		 writeEEPROM(1, true);
+	 }
      break;
    
    case MSP_TRIM_LEFT:
-     //conf.angleTrim[ROLL]-=1; 
-     //writeParams(1);
-     //#if defined(LED_RING)
-     //  blinkLedRing();
-     //#endif
-     cfg.angleTrim[ROLL] -= 1;    
-     writeEEPROM(1, true);   
+	 if( cfg.angleTrim[ROLL] > -120 )
+	 {
+		 cfg.angleTrim[ROLL] -= 1;
+		 writeEEPROM(1, true);
+	 }
      break;
 
    case MSP_TRIM_RIGHT:
-     //conf.angleTrim[ROLL]+=1; 
-     //writeParams(1);
-     //#if defined(LED_RING)
-     //  blinkLedRing();
-     //#endif
-     cfg.angleTrim[ROLL] += 1;    
-     writeEEPROM(1, true);   
+	 if( cfg.angleTrim[ROLL] < 120 )
+	 {
+		 cfg.angleTrim[ROLL] += 1;
+		 writeEEPROM(1, true);
+	 }
      break;
+
+
+
+   case MSP_TRIM_UP_FAST:
+     if(cfg.angleTrim[PITCH] < 120)
+     {
+    	 cfg.angleTrim[PITCH] += 10;
+    	 writeEEPROM(1, true);
+     }
+     break;
+
+   case MSP_TRIM_DOWN_FAST:
+	 if( cfg.angleTrim[PITCH] > -120 )
+	 {
+		 cfg.angleTrim[PITCH] -= 10;
+		 writeEEPROM(1, true);
+	 }
+     break;
+
+   case MSP_TRIM_LEFT_FAST:
+	 if( cfg.angleTrim[ROLL] > -120 )
+	 {
+		 cfg.angleTrim[ROLL] -= 10;
+		 writeEEPROM(1, true);
+	 }
+     break;
+
+   case MSP_TRIM_RIGHT_FAST:
+	 if( cfg.angleTrim[ROLL] < 120 )
+	 {
+		 cfg.angleTrim[ROLL] += 10;
+		 writeEEPROM(1, true);
+	 }
+     break;
+
+
+   case MSP_HEX_NANO:
+     headSerialReply(14);
+     //serialize8(flightState);
+     //serialize16(absolutedAccZ);
+     serialize8(0);
+     serialize16(0);
+
+     //serialize32(EstAlt);
+     serialize16((int16_t)EstAlt);
+     for( i=0;i<2;i++)
+     {
+    	 serialize16(angle[i]);
+     }
+     serialize16((int16_t)AltHold);
+     serialize8(vbat);
+     serialize8((int8_t)(cfg.angleTrim[PITCH]));
+     serialize8((int8_t)(cfg.angleTrim[ROLL]));
 
    #endif
 
@@ -443,11 +511,15 @@ static void evaluateCommand(void)
             rcData[i] = read16();
         headSerialReply(0);
         break;
+
+#ifndef SKYROVER
     case MSP_SET_ACC_TRIM:
         cfg.angleTrim[PITCH] = read16();
         cfg.angleTrim[ROLL]  = read16();
         headSerialReply(0);
         break;
+#endif
+
     case MSP_SET_RAW_GPS:
         f.GPS_FIX = read8();
         GPS_numSat = read8();
@@ -758,6 +830,7 @@ static void evaluateCommand(void)
         break;
 
     // Additional commands that are not compatible with MultiWii
+#ifndef SKYROVER
     case MSP_ACC_TRIM:
         headSerialReply(4);
         serialize16(cfg.angleTrim[PITCH]);
@@ -779,6 +852,7 @@ static void evaluateCommand(void)
                serialize8(GPS_svinfo_cno[i]);
             }
         break;
+#endif
     default:                   // we do not know how to handle the (valid) message, indicate error MSP $M!
         headSerialError(0);
         break;
@@ -851,6 +925,21 @@ void serialCom(void)
         } else if (c_state == HEADER_CMD && offset >= dataSize) {
             if (checksum == c) {        // compare calculated and transferred checksum
                 evaluateCommand();      // we got a valid packet, evaluate it
+
+                if( core.useShowMspCmd == true )
+                {
+                	Hw_VCom_Printf("Cmd : %d, RC : %d, %d, %d, %d, %d, %d, %d, %d BARO:%d\r\n", cmdMSP
+                			,rcData[0]
+                			,rcData[1]
+                			,rcData[2]
+                  			,rcData[3]
+                   			,rcData[4]
+                   			,rcData[5]
+                   			,rcData[6]
+                           	,rcData[7]
+                           	,rcOptions[BOXBARO]
+                			);
+                }
             }
             c_state = IDLE;
         }

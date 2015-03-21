@@ -1,11 +1,6 @@
 #include "board.h"
 #include "mw.h"
 
-#include <errno.h>
-#include <sys/times.h>
-#include <sys/stat.h>
-
-
 static bool standardBoardAlignment = true;     // board orientation correction
 static float boardRotation[3][3];              // matrix
 
@@ -124,52 +119,4 @@ void alignSensors(int16_t *src, int16_t *dest, uint8_t rotation)
 
     if (!standardBoardAlignment)
         alignBoard(dest);
-}
-
-
-
-
-/* errno definition */
-#undef errno
-extern int errno;
-
-char *__env[1] = { 0 };
-char **environ = __env;
-
-int _close(int file)
-{
-  return -1;
-}
-
-int _execve(char *name, char **argv, char **env)
-{
-  errno = ENOMEM;
-  return -1;
-}
-int _exit()
-{
-  return 0;
-}
-
-int _fork()
-{
-  errno = EAGAIN;
-  return -1;
-}
-
-int _fstat(int file, struct stat *st)
-{
-  st->st_mode = S_IFCHR;
-  return 0;
-}
-
-int _getpid()
-{
-  return 1;
-}
-
-int _kill(int pid, int sig)
-{
-  errno = EINVAL;
-  return(-1);
 }

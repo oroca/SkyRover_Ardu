@@ -8,7 +8,7 @@ skyrover.upload.maximum_size       	= 115000
 skyrover.upload.ram.maximum_size   	= 17000
 skyrover.upload.flash.maximum_size 	= 115000
 skyrover.bootloader.tool			= stm32ld
-skyrover.bootloader.file			= boot_smart.bin
+skyrover.bootloader.file			= boot_skyrover.bin
 
 
 skyrover.build.board				= SkyRover
