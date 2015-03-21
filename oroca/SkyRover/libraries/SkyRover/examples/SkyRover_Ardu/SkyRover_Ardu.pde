@@ -8,7 +8,7 @@ void setup()
   // put your setup code here, to run once:
                                      
   Sky.begin();
-  Sky.menu_off();
+  Sky.menu_on();
 }
 
 void loop() 
