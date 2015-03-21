@@ -71,6 +71,9 @@ int main(void)
     checkFirstTime(false);
     readEEPROM();
 
+#ifdef CUP_DRONE
+    mcfg.vbatscale = 26;
+#endif
 
     // configure power ADC
     if (mcfg.power_adc_channel > 0 && (mcfg.power_adc_channel == 1 || mcfg.power_adc_channel == 9))

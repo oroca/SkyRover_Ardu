@@ -11,6 +11,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "config.h"
+
 #include "stm32f10x_conf.h"
 #include "core_cm3.h"
 
@@ -23,11 +25,6 @@
 #include "drv_system.h"         // timers, delays, etc
 #include "drv_gpio.h"
 
-
-#define _SKYROVER_VER_STR_  	"V150321R1"
-
-#define SKYROVER_HEX
-//#define SKYROVER_QUAD
 
 
 #define PORT_UART1				1

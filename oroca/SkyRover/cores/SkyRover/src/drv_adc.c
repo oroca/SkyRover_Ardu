@@ -37,12 +37,22 @@ void adcInit(drv_adc_config_t *init)
     ADC_InitStructure.ADC_NbrOfChannel = multiChannel ? 2 : 1;
     ADC_Init(ADC1, &ADC_InitStructure);
 
+#ifdef CUP_DRONE
+    //-- CupDron는 ADC 5번(PA5)
+    //
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_28Cycles5);
+    if (multiChannel)
+        ADC_RegularChannelConfig(ADC1, init->powerAdcChannel, 2, ADC_SampleTime_28Cycles5);
+    ADC_DMACmd(ADC1, ENABLE);    
+#else
     //-- SkyRover는 ADC 10번(PC0)
     //
     ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_28Cycles5);
     if (multiChannel)
         ADC_RegularChannelConfig(ADC1, init->powerAdcChannel, 2, ADC_SampleTime_28Cycles5);
     ADC_DMACmd(ADC1, ENABLE);
+#endif
+
 
     ADC_Cmd(ADC1, ENABLE);
 
