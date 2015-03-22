@@ -6,6 +6,7 @@
 //#define SKYROVER_HEX
 #define SKYROVER_QUAD
 
+#define CUP_DRONE
 
 
 

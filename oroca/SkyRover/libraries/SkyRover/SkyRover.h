@@ -28,18 +28,63 @@
 class SkyRover
 {
 public:
+
+	int16_t motor_pwm[4];
+	
+
 	void begin();
 	void delay( int32_t delay_data );
-	void usb_printf( char *format, ... );
 	void uart1_printf( char *format, ... );
+	void printf( char *format, ... );
 
+	//-- 명령/기체 상태
+	// 
+	int8_t arm_get_status( void );
+	bool   cmd_ready( void );
+
+	//-- USB 시리얼의 메뉴 사용 유/무 
+	//
 	void menu_on(void);
 	void menu_off(void);
 
-	int16_t imu_GetAngleRoll( void );
-	int16_t imu_GetAnglePitch( void );
-	int16_t imu_GetAngleYaw( void );
+	//-- 멀티위 동작 사용 유/무 
+	//
+	void   mw_on( void );
+	void   mw_off( void );
+	int8_t mw_get_status( void );
 
+	//-- IMU 센서 데이터 
+	//
+	int16_t imu_get_angle_roll( void );
+	int16_t imu_get_angle_pitch( void );
+	int16_t imu_get_angle_yaw( void );
+
+	int16_t imu_get_gyro_roll( void );
+	int16_t imu_get_gyro_pitch( void );
+	int16_t imu_get_gyro_yaw( void );
+
+	//-- LED 
+	//
+	void led_toggle( uint8_t ch );
+	void led_on( uint8_t ch );
+	void led_off( uint8_t ch );
+
+	//-- 블루투스 통신 명령 데이터 
+	//
+	int16_t cmd_get_roll( void );
+	int16_t cmd_get_pitch( void );
+	int16_t cmd_get_yaw( void );
+	int16_t cmd_get_throttle( void );
+
+	//-- 모터 제어 명령 
+	//
+	void motor_safe_off(void);
+	void motor_safe_on(void);
+
+	void motor_set_speed_FRONT_L( int16_t speed );	
+	void motor_set_speed_FRONT_R( int16_t speed );	
+	void motor_set_speed_REAR_L( int16_t speed );	
+	void motor_set_speed_REAR_R( int16_t speed );	
 
 private:
 };

@@ -221,7 +221,13 @@ typedef struct baro_t
 #define SENSORS_SET (SENSOR_ACC | SENSOR_BARO)
 
 
+void led_toggle( uint8_t ch, bool mw_check );
+void led_on( uint8_t ch, bool mw_check );
+void led_off( uint8_t ch, bool mw_check );
+
+
 // Helpful macros
+/*
 #define LED0_TOGGLE              digitalToggle(LED0_GPIO, LED0_PIN);
 #define LED0_OFF                 digitalLo(LED0_GPIO, LED0_PIN);
 #define LED0_ON                  digitalHi(LED0_GPIO, LED0_PIN);
@@ -229,6 +235,15 @@ typedef struct baro_t
 #define LED1_TOGGLE              digitalToggle(LED1_GPIO, LED1_PIN);
 #define LED1_OFF                 digitalLo(LED1_GPIO, LED1_PIN);
 #define LED1_ON                  digitalHi(LED1_GPIO, LED1_PIN);
+*/
+#define LED0_TOGGLE              led_toggle(0, true);
+#define LED0_OFF                 led_off(0, true);
+#define LED0_ON                  led_on(0, true);
+
+#define LED1_TOGGLE              led_toggle(1, true);
+#define LED1_OFF                 led_toggle(1, true);
+#define LED1_ON                  led_toggle(1, true);
+
 
 #ifdef BEEP_GPIO
 #define BEEP_TOGGLE              digitalToggle(BEEP_GPIO, BEEP_PIN);

@@ -65,6 +65,13 @@ uint16_t AccInflightCalibrationActive = 0;
 uint8_t batteryCellCount = 3;       // cell count
 uint16_t batteryWarningVoltage;     // annoying buzzer after this one, battery ready to be dead
 
+extern int16_t imu_angle[3];
+extern int16_t imu_gyro[3];
+extern int8_t  arm_flag;
+extern int8_t  cmd_ready;
+extern int8_t  mw_enable;
+extern bool    motor_safe;
+
 void blinkLED(uint8_t num, uint8_t wait, uint8_t repeat)
 {
     uint8_t i, r;
@@ -79,6 +86,60 @@ void blinkLED(uint8_t num, uint8_t wait, uint8_t repeat)
         delay(60);
     }
 }
+
+
+void led_toggle( uint8_t ch, bool mw_check )
+{
+    if( mw_enable == false && mw_check == true ) return;
+
+    switch( ch )
+    {
+        case 0:
+            digitalToggle(LED0_GPIO, LED0_PIN);
+            break;
+
+        case 1:
+            digitalToggle(LED1_GPIO, LED1_PIN);
+            break;
+    }
+}
+
+
+void led_on( uint8_t ch, bool mw_check )
+{
+    if( mw_enable == false && mw_check == true ) return;
+
+    switch( ch )
+    {
+        case 0:
+            digitalHi(LED0_GPIO, LED0_PIN);
+            break;
+
+        case 1:
+            digitalHi(LED1_GPIO, LED1_PIN);
+            break;
+    }
+}
+
+
+void led_off( uint8_t ch, bool mw_check )
+{
+    if( mw_enable == false && mw_check == true ) return;
+
+    switch( ch )
+    {
+        case 0:
+            digitalLo(LED0_GPIO, LED0_PIN);
+            break;
+
+        case 1:
+            digitalLo(LED1_GPIO, LED1_PIN);
+            break;
+    }
+}
+
+
+
 
 #define BREAKPOINT 1500
 
@@ -431,6 +492,7 @@ void setPIDController(int type)
     }
 }
 
+
 void loop_mw(void)
 {
     static uint8_t rcDelayCommand;      // this indicates the number of time (multiple of RC measurement at 50Hz) the sticks must be maintained to run or switch off motors
@@ -471,6 +533,11 @@ void loop_mw(void)
                 break;                
             #endif
         }
+    }
+
+    if( rcReady == true )
+    {
+        cmd_ready = true;
     }
 
     if (((int32_t)(currentTime - rcTime) >= 0) || rcReady) { // 50Hz or data driven
@@ -938,11 +1005,33 @@ void loop_mw(void)
             }
         }
 
-        // PID - note this is function pointer set by setPIDController()
-        pid_controller();
 
-        mixTable();
-        writeServos();
-        writeMotors();
+        // 아두이노 업데이트
+        imu_angle[0] = angle[0];
+        imu_angle[1] = angle[1];
+        imu_angle[2] = heading;
+        
+        imu_gyro[0] = gyroData[0];
+        imu_gyro[1] = gyroData[1];
+        imu_gyro[2] = gyroData[2];
+        
+        arm_flag = f.ARMED;
+
+        if( mw_enable == true )
+        {
+            // PID - note this is function pointer set by setPIDController()
+            pid_controller();
+
+            mixTable();
+            writeServos();
+            writeMotors();
+        }
+        else
+        {
+            if( !arm_flag && motor_safe == true )
+            {
+                writeAllMotors(mcfg.mincommand);
+            }
+        }
     }
 }
